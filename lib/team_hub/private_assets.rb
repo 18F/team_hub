@@ -44,11 +44,12 @@ module TeamHub
       private_root = File.join(site.source, site.config['private_data_path'])
       source_dir = File.join(private_root, dir_to_copy)
       return unless Dir.exists? source_dir
-      d = Dir.open(source_dir)
-      d.each do |filename|
-        next if ['.', '..'].include? filename
-        site.static_files << ::Jekyll::StaticFile.new(
-          site, private_root, dir_to_copy, filename)
+      Dir.open(source_dir) do |dir|
+        dir.each do |filename|
+          next if ['.', '..'].include? filename
+          site.static_files << ::Jekyll::StaticFile.new(
+            site, private_root, dir_to_copy, filename)
+        end
       end
     end
   end
