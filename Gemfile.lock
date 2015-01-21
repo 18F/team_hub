@@ -78,7 +78,7 @@ GEM
       multi_json (~> 1.0)
       simplecov-html (~> 0.8.0)
     simplecov-html (0.8.0)
-    test_temp_file_helper (0.0.1)
+    test_temp_file_helper (0.0.2)
       rake (~> 10.0)
     timers (4.0.1)
       hitimes
