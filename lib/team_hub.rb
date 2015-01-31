@@ -15,6 +15,7 @@
 # @author Mike Bland (michael.bland@gsa.gov)
 
 require 'team_hub/canonicalizer'
+require 'team_hub/cross_referencer'
 require 'team_hub/version'
 require 'team_hub/page'
 require 'team_hub/private_assets'
