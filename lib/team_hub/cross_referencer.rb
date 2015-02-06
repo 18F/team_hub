@@ -130,4 +130,81 @@ module TeamHub
       end.compact.to_h
     end
   end
+
+  # Implements CrossReferencer operations.
+  class CrossReferencerImpl
+    attr_reader :site_data
+
+    def initialize(site_data)
+      @site_data = site_data
+      @team = @site_data['team'].map {|i| [i['name'], i]}.to_h
+    end
+
+    # Cross-references geographic locations with team members.
+    #
+    # The resulting site.data['locations'] collection will be an Array of
+    # [location code, Array<Hash> of team members].
+    def xref_locations_and_team_members
+      locations = CrossReferencer.create_index(@site_data['team'], 'location')
+      @site_data['locations'] = locations.to_a.sort! unless locations.empty?
+    end
+
+    # Cross-references projects with team members. Replaces string-based
+    # site_data['projects']['team'] values with team member hashes.
+    def xref_projects_and_team_members
+      projects = @site_data['projects']
+      projects.each {|p| p['team'] = p['team'].split(/, ?/) if p['team']}
+      CrossReferencer.create_xrefs projects, 'team', @team, 'projects'
+    end
+
+    # Cross-references groups with team members.
+    #
+    # @param groups_name [String] site.data key identifying the group
+    #   collection, e.g. 'working_groups'
+    # @param member_type_list_names [Array<String>] names of the properties
+    #   identifying lists of members, e.g. ['leads', 'members']
+    def xref_groups_and_team_members(groups_name, member_type_list_names)
+      member_type_list_names.each do |member_type|
+        CrossReferencer.create_xrefs(
+          @site_data[groups_name], member_type, @team, groups_name)
+      end
+      @team.values.each {|i| (i[groups_name] || []).uniq! {|g| g['name']}}
+    end
+
+    # Cross-references snippets with team members. Also sets
+    # site.data['snippets_latest'] and @site_data['snippets_team_members'].
+    def xref_snippets_and_team_members
+      (@site_data['snippets'] || []).each do |timestamp, snippets|
+        snippets.each do |snippet|
+          (@team[snippet['name']]['snippets'] ||= Array.new) << snippet
+        end
+
+        # Since the snippets are naturally ordered in chronological order,
+        # the last will be the latest.
+        @site_data['snippets_latest'] = timestamp
+      end
+
+      @site_data['snippets_team_members'] = @team.values.select do |i|
+        i['snippets']
+      end unless (@site_data['snippets'] || []).empty?
+    end
+
+    # Cross-references skillsets with team members.
+    #
+    # @param skills [Array<String>] list of skill categories; may be
+    #   capitalized, though the members of site.data['team'] pertaining to
+    #   each category should be lowercased
+    def xref_skills_and_team_members(categories)
+      skills = categories.map {|category| [category, Hash.new]}.to_h
+
+      @team.values.each do |i|
+        skills.each do |category, xref|
+          (i[category.downcase] || []).each {|s| (xref[s] ||= Array.new) << i}
+        end
+      end
+
+      skills.delete_if {|category, skill_xref| skill_xref.empty?}
+      @site_data['skills'] = skills unless skills.empty?
+    end
+  end
 end
