@@ -24,8 +24,8 @@ module TeamHub
     # @param key [String] property used to build the index
     # @return [Hash]
     def self.create_index(collection, key)
-      index = {}
-      collection.each {|i| (index[i[key]] ||= Array.new) << i if i[key]}
+      index = collection.group_by {|i| i[key]}
+      index.delete nil
       index
     end
 
