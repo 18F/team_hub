@@ -142,11 +142,14 @@ module TeamHub
 
     # Cross-references geographic locations with team members.
     #
-    # The resulting site.data['locations'] collection will be an Array of
-    # [location code, Array<Hash> of team members].
+    # The resulting site.data['locations'] collection will be an Array<Hash>
+    # of location code => {'team' => Array}.
     def xref_locations_and_team_members
       locations = CrossReferencer.create_index(@site_data['team'], 'location')
-      @site_data['locations'] = locations.to_a.sort! unless locations.empty?
+      locations = locations.to_a.sort!.map do |entry|
+        {'code' => entry[0], 'team' => entry[1]}
+      end
+      @site_data['locations'] = locations unless locations.empty? 
     end
 
     # Cross-references projects with team members. Replaces string-based

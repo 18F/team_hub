@@ -54,9 +54,9 @@ module TeamHub
       xref.xref_locations_and_team_members
 
       expected = [
-        ['DCA', [team[0], team[3], team[4]]],
-        ['NYC', [team[1]]],
-        ['TUS', [team[2]]],
+        {'code' => 'DCA', 'team' => [team[0], team[3], team[4]]},
+        {'code' => 'NYC', 'team' => [team[1]]},
+        {'code' => 'TUS', 'team' => [team[2]]},
       ]
       assert_equal expected, @site.data['locations']
     end
