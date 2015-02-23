@@ -37,27 +37,76 @@ module TeamHub
 
     def test_no_locations_member_created_if_team_is_empty
       xref = create_xref_using_team_data []
-      xref.xref_locations_and_team_members
+      xref.xref_locations
       assert_nil @site.data['locations']
     end
 
-    def test_xref_locations_and_team_members
+    def test_xref_locations
+      projects = [
+        {'name' => 'Outreach'},
+        {'name' => 'C2'},
+        {'name' => 'EITI'},
+      ]
+
+      working_groups = [
+        {'name' => 'Documentation'},
+        {'name' => 'DevOps'},
+        {'name' => 'Frontend'},
+        {'name' => 'Testing'},
+        {'name' => 'Working Groups'},
+      ]
+
       team = [
-        {'name' => 'mbland', 'location' => 'DCA'},
-        {'name' => 'afeld', 'location' => 'NYC'},
-        {'name' => 'mhz', 'location' => 'TUS'},
-        {'name' => 'gboone', 'location' => 'DCA'},
-        {'name' => 'ekamlley', 'location' => 'DCA'},
+        {'name' => 'mbland', 'location' => 'DCA',
+         'working_groups' => [
+           working_groups[0],
+           working_groups[3],
+           working_groups[4],
+         ],
+        },
+        {'name' => 'afeld', 'location' => 'NYC',
+         'projects' => [projects[1]],
+         'working_groups' => [working_groups[0], working_groups[1]],
+        },
+        {'name' => 'mhz', 'location' => 'TUS',
+         'projects' => [projects[2]],
+         'working_groups' => [working_groups[0], working_groups[2]],
+        },
+        {'name' => 'gboone', 'location' => 'DCA',
+         'projects' => [projects[0]],
+         'working_groups' => [working_groups[0]],
+        },
+        {'name' => 'ekamlley', 'location' => 'DCA',
+         'projects' => [projects[0]],
+         'working_groups' => [working_groups[0]],
+        },
       ]
 
       xref = create_xref_using_team_data team
-      xref.xref_locations_and_team_members
+      xref.xref_locations
 
       expected = [
-        {'code' => 'DCA', 'team' => [team[0], team[3], team[4]]},
-        {'code' => 'NYC', 'team' => [team[1]]},
-        {'code' => 'TUS', 'team' => [team[2]]},
+        {'code' => 'DCA',
+         'team' => [team[0], team[3], team[4]],
+         'projects' => [projects[0]],
+         'working_groups' => [
+           working_groups[0], working_groups[3], working_groups[4],
+         ],
+        },
+        {'code' => 'NYC',
+         'team' => [team[1]],
+         'projects' => [projects[1]],
+         'working_groups' => [working_groups[0], working_groups[1]],
+        },
+        {'code' => 'TUS',
+         'team' => [team[2]],
+         'projects' => [projects[2]],
+         'working_groups' => [working_groups[0], working_groups[2]],
+        },
       ]
+      ['projects', 'working_groups'].each do |category|
+        expected.each {|i| i[category].sort_by!{|j| j['name']}}
+      end
       assert_equal expected, @site.data['locations']
     end
   end
