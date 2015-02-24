@@ -1,6 +1,6 @@
 # team_hub - Components for creating a team Hub using Jekyll
 #
-# Written in 2015 by Mike Bland (michael.bland@gsa.gov)
+# Written in 2014 by Mike Bland (michael.bland@gsa.gov)
 # on behalf of the 18F team, part of the US General Services Administration:
 # https://18f.gsa.gov/
 #
@@ -14,9 +14,16 @@
 #
 # @author Mike Bland (michael.bland@gsa.gov)
 
-require 'team_hub/canonicalizer'
-require 'team_hub/cross_referencer'
-require 'team_hub/joiner'
-require 'team_hub/version'
-require 'team_hub/page'
-require 'team_hub/private_assets'
+require "jekyll"
+require "jekyll/page"
+
+module TeamHub
+  class DummyTestPage < ::Jekyll::Page
+    def initialize(site, dir, filename)
+      @site = site
+      @base = 'fake_test_basedir'
+      @dir = dir
+      @name = filename
+    end
+  end
+end
