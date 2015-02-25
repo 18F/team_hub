@@ -28,6 +28,24 @@ module TeamHub
       @site = DummyTestSite.new(config: config)
       @site.data.delete 'private'
       @site.data.delete 'public'
+      @locations = [
+        {'code' => 'DCA',
+         'latitude' => 38.843677,
+         'longitude' => -77.046915,
+         'timezone' => 'Eastern Time Zone (UTC-05:00)',
+        },
+        {'code' => 'NYC',
+         'latitude' => 40.641311,
+         'longitude' => -73.778139,
+         'timezone' => 'Eastern Time Zone (UTC-05:00)',
+        },
+        {'code' => 'TUS',
+         'latitude' => 32.11451,
+         'longitude' => -110.939227,
+         'timezone' => 'Mountain Time Zone (UTC-07:00)',
+        },
+      ]
+      @site.data['locations'] = @locations
     end
 
     def create_xref_using_team_data(team)
@@ -35,10 +53,12 @@ module TeamHub
       CrossReferencerImpl.new @site.data
     end
 
-    def test_no_locations_member_created_if_team_is_empty
+    def test_no_locations_updated_if_team_is_empty
       xref = create_xref_using_team_data []
       xref.xref_locations
-      assert_nil @site.data['locations']
+      assert_empty @site.data['locations'].map{|i| i['team']}.compact!
+      assert_empty @site.data['locations'].map{|i| i['projects']}.compact!
+      assert_empty @site.data['locations'].map{|i| i['working_groups']}.compact!
     end
 
     def test_xref_locations
@@ -87,6 +107,9 @@ module TeamHub
 
       expected = [
         {'code' => 'DCA',
+         'latitude' => 38.843677,
+         'longitude' => -77.046915,
+         'timezone' => 'Eastern Time Zone (UTC-05:00)',
          'team' => [team[0], team[3], team[4]],
          'projects' => [projects[0]],
          'working_groups' => [
@@ -94,11 +117,17 @@ module TeamHub
          ],
         },
         {'code' => 'NYC',
+         'latitude' => 40.641311,
+         'longitude' => -73.778139,
+         'timezone' => 'Eastern Time Zone (UTC-05:00)',
          'team' => [team[1]],
          'projects' => [projects[1]],
          'working_groups' => [working_groups[0], working_groups[1]],
         },
         {'code' => 'TUS',
+         'latitude' => 32.11451,
+         'longitude' => -110.939227,
+         'timezone' => 'Mountain Time Zone (UTC-07:00)',
          'team' => [team[2]],
          'projects' => [projects[2]],
          'working_groups' => [working_groups[0], working_groups[2]],

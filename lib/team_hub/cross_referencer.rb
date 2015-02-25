@@ -14,6 +14,8 @@
 #
 # @author Mike Bland (michael.bland@gsa.gov)
 
+require 'hash-joiner'
+
 module TeamHub
 
   # Operations for creating cross-references between data objects
@@ -162,7 +164,7 @@ module TeamHub
         end
         result
       end
-      @site_data['locations'] = locations unless locations.empty? 
+      HashJoiner.join_array_data 'code', @site_data['locations'], locations
     end
 
     # Cross-references projects with team members. Replaces string-based
