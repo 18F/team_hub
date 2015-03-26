@@ -25,7 +25,9 @@ module TeamHub
     # site generation time.
     # +site+:: Jekyll site object
     def self.copy_to_site(site)
-      copy_directory_to_site site, site.config['team_img_dir']
+      copy_files(site, site.config['private_data_path'],
+        site.config['team_img_dir'])
+      copy_files site, site.config['private_pages_path'], 'assets'
     end
 
     # Determines whether or not a private asset is present.
@@ -40,16 +42,14 @@ module TeamHub
     # @param site [Jekyll::Site] Jekyll site object
     # @param dir_to_copy [string] directory within
     #   site.config['private_data_path'] to copy into the generated site
-    def self.copy_directory_to_site(site, dir_to_copy)
-      private_root = File.join(site.source, site.config['private_data_path'])
-      source_dir = File.join(private_root, dir_to_copy)
-      return unless Dir.exists? source_dir
-      Dir.open(source_dir) do |dir|
-        dir.each do |filename|
-          next if ['.', '..'].include? filename
-          site.static_files << ::Jekyll::StaticFile.new(
-            site, private_root, dir_to_copy, filename)
-        end
+    def self.copy_files(site, relative_root_path, dir_to_copy)
+      abs_dir_to_copy_path = File.join(site.source, relative_root_path,
+        dir_to_copy)
+      begin_path = abs_dir_to_copy_path.size + File::SEPARATOR.size
+      Dir[File.join(abs_dir_to_copy_path, '**', '*')].each do |filename|
+        next unless File.file? filename
+        site.static_files << ::Jekyll::StaticFile.new(
+          site, relative_root_path, dir_to_copy, filename[begin_path..-1])
       end
     end
   end

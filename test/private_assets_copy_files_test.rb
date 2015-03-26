@@ -22,7 +22,7 @@ require "minitest/autorun"
 require "test_temp_file_helper"
 
 module TeamHub
-  class PrivateAssetsCopyDirectoryToSiteTest < ::Minitest::Test
+  class PrivateAssetsCopyFilesTest < ::Minitest::Test
     def setup
       @temp_file_helper = TestTempFileHelper::TempFileHelper.new
       config = {
@@ -39,14 +39,16 @@ module TeamHub
     end
 
     def test_private_source_dir_does_not_exist
-      PrivateAssets.copy_directory_to_site @site, @source_dir
+      PrivateAssets.copy_files(@site, @site.config['private_data_path'],
+        'assets')
       assert_empty @site.static_files
     end
 
     def test_private_source_dir_is_empty
       @temp_file_helper.mkdir(File.join(@site.config['private_data_path'],
         @source_dir))
-      PrivateAssets.copy_directory_to_site @site, @source_dir
+      PrivateAssets.copy_files(@site, @site.config['private_data_path'],
+        'assets')
       assert_empty @site.static_files
     end
 
@@ -57,7 +59,8 @@ module TeamHub
             @source_dir, filename))
       end
 
-      PrivateAssets.copy_directory_to_site @site, @source_dir
+      PrivateAssets.copy_files(@site, @site.config['private_data_path'],
+        'assets')
       expected = img_files.map {|f| File.join @source_dir, f}
       actual = @site.static_files.map {|f| File.join f.relative_path}
       assert_equal expected.sort, actual.sort
