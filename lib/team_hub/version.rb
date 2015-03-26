@@ -23,5 +23,5 @@
 #   https://github.com/18F/hub"
 
 module TeamHub
-  VERSION = "0.0.5"
+  VERSION = "0.0.6"
 end
